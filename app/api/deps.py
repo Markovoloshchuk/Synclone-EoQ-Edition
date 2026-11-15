@@ -52,4 +52,4 @@ CurrentUser = Annotated[User, Depends(get_current_user)]
 AdminUser = Annotated[User, Depends(get_current_admin)]
 DbSession = Annotated[AsyncSession, Depends(get_db)]
 
-#Add some comment for testing purposes
+# Add some comment for testing purposes
