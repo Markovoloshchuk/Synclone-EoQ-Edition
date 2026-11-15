@@ -2,24 +2,24 @@ name: CI
 
 on:
   push:
-    branches: [ "**" ]
+    branches: ["**"]
   pull_request:
-    branches: [ "**" ]
+    branches: [main]
+
+permissions:
+  contents: read
 
 jobs:
   lint-and-test:
     runs-on: ubuntu-latest
-    
     env:
       APP_ENV: sandbox
       PROJECT_NAME: Clone Memory Synchronizer
-      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
-      DEBUG: false
-      JWT_SECRET_KEY: ci-only-secret-not-for-production
-      JWT_EXPIRE_MINUTES: 60
-      INITIAL_ADMIN_EMAIL: admin@example.com
-      INITIAL_ADMIN_PASSWORD: securepassword123
-      INITIAL_ADMIN_NAME: Admin
+      DATABASE_URL: sqlite+aiosqlite:///:memory:
+      DEBUG: "false"
+      JWT_EXPIRE_MINUTES: "60"
+      INITIAL_ADMIN_EMAIL: ci-admin@example.test
+      INITIAL_ADMIN_NAME: CI Admin
 
     steps:
       - name: Checkout repository
@@ -28,13 +28,27 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
-          cache: 'pip'
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: |
+            requirements.txt
+            requirements-dev.txt
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          python -m pip install -r requirements-dev.txt
+
+      - name: Generate ephemeral test credentials
+        run: |
+          python - <<'PY'
+          import os
+          import secrets
+
+          with open(os.environ["GITHUB_ENV"], "a", encoding="utf-8") as env_file:
+              env_file.write(f"JWT_SECRET_KEY={secrets.token_urlsafe(64)}\n")
+              env_file.write(f"INITIAL_ADMIN_PASSWORD={secrets.token_urlsafe(32)}\n")
+          PY
 
       - name: Run Ruff
         run: ruff check app tests
