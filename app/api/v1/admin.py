@@ -46,4 +46,3 @@ async def change_active(user_id: int, is_active: bool, admin: AdminUser, db: DbS
     return user
 
 
-# Test baseline update
