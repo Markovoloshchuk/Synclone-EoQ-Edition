@@ -47,7 +47,7 @@ async def get_current_admin(current_user: User = Depends(get_current_user)) -> U
     return current_user
 
 
-# Додаємо аліси (Type Aliases) для зручної ін'єкції залежностей у роутерах
+# Додаємо аліаси (Type Aliases) для зручної ін'єкції залежностей у роутерах
 CurrentUser = Annotated[User, Depends(get_current_user)]
 AdminUser = Annotated[User, Depends(get_current_admin)]
 DbSession = Annotated[AsyncSession, Depends(get_db)]
